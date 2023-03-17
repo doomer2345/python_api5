@@ -34,9 +34,14 @@ def get_vacancies_hh(language):
             predicted_salary = predict_rub_salary(vacancy["salary"].get("from"), vacancy["salary"].get("to"), vacancy["salary"].get("currency"))
             if predicted_salary:
                 salaries.append(predicted_salary)
+    vacancies_processed = len(salaries)
+    if vacancies_processed:
+        average_salary = sum(salaries) // len(salaries)
+    else:
+        average_salary = 0
     return {
-        "average_salary": sum(salaries) // len(salaries),
-        "vacancies_processed": len(salaries),
+        "average_salary": average_salary,
+        "vacancies_processed":  vacancies_processed,
         "vacancies_found": vacancies_found
     }
 
@@ -92,7 +97,7 @@ def predict_rub_salary(salary_from, salary_to, salary_currency):
         return salary_to*0.8
 
 
-def make_table(languages_params, title):
+def make_content(languages_params, title):
     table_content = [
         ['Язык программирования', 'Вакансий найдено', 'Вакансий обработано', 'Средняя зарплата'],
     ]
