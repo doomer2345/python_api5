@@ -20,9 +20,10 @@ def get_vacancies_hh(language):
 
         response = requests.get(url, params=params)
         response.raise_for_status()
-        vacancies = response.json()["items"]
-        vacancies_found = response.json()["found"]
-        quantity_pages = response.json()["pages"]
+        response_content = response.json()
+        vacancies = response_content["items"]
+        vacancies_found = response_content["found"]
+        quantity_pages = response_content["pages"]
         page += 1
         for vacancy in vacancies:
             salary = vacancy["salary"]
@@ -53,10 +54,11 @@ def get_vacancies_sj(sj_secret_key, language):
         }
         response = requests.get(url, headers=headers, params=params)
         response.raise_for_status()
-        vacancies_sj = response.json()['objects']
-        vacancies_found = response.json()['total']
+        response_content = response.json()
+        vacancies_sj = response_content['objects']
+        vacancies_found = response_content['total']
         page += 1
-        if not response.json()['more']:
+        if not response_content['more']:
             break
         for vacancy_sj in vacancies_sj:
             payment_from = vacancy_sj["payment_from"]
