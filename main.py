@@ -10,10 +10,12 @@ def get_vacancies_hh(language):
     page = 0
     quantity_pages = 1
     salaries = []
+    area_id = 1
+    period_in_days = 30
     while page < quantity_pages:
         params = {
-            'area': 1,
-            'period': 30,
+            'area': area_id,
+            'period': period_in_days,
             'text': language,
             'page': page
         }
