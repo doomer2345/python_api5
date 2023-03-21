@@ -5,14 +5,14 @@ from dotenv import load_dotenv
 from terminaltables import AsciiTable
 
 
-def get_vacancies_hh(language):
+def get_hh_vacancies(language):
     url = 'https://api.hh.ru/vacancies'
     page = 0
-    quantity_pages = 1
+    pages_quantity = 1
     salaries = []
     area_id = 1
     period_in_days = 30
-    while page < quantity_pages:
+    while page < pages_quantity:
         params = {
             'area': area_id,
             'period': period_in_days,
@@ -25,7 +25,7 @@ def get_vacancies_hh(language):
         response_content = response.json()
         vacancies = response_content["items"]
         vacancies_found = response_content["found"]
-        quantity_pages = response_content["pages"]
+        pages_quantity = response_content["pages"]
         page += 1
         for vacancy in vacancies:
             salary = vacancy["salary"]
@@ -46,10 +46,10 @@ def get_vacancies_hh(language):
     }
 
 
-def get_vacancies_sj(sj_secret_key, language):
+def get_sj_vacancies(sj_secret_key, language):
     url = '	https://api.superjob.ru/2.0/vacancies/'
     page = 0
-    salarys = []
+    salaries = []
     while True:
         params = {
             'keyword': language,
@@ -62,21 +62,21 @@ def get_vacancies_sj(sj_secret_key, language):
         response = requests.get(url, headers=headers, params=params)
         response.raise_for_status()
         response_content = response.json()
-        vacancies_sj = response_content['objects']
+        sj_vacancies = response_content['objects']
         vacancies_found = response_content['total']
         page += 1
         if not response_content['more']:
             break
-        for vacancy_sj in vacancies_sj:
-            payment_from = vacancy_sj["payment_from"]
-            payment_to = vacancy_sj["payment_to"]
-            payment_currency = vacancy_sj["currency"]
+        for sj_vacancy in sj_vacancies:
+            payment_from = sj_vacancy["payment_from"]
+            payment_to = sj_vacancy["payment_to"]
+            payment_currency = sj_vacancy["currency"]
             predicted_salary = predict_rub_salary(payment_from, payment_to, payment_currency)
             if predicted_salary:
-                salarys.append(predicted_salary)
-    vacancies_processed = len(salarys)
+                salaries.append(predicted_salary)
+    vacancies_processed = len(salaries)
     if vacancies_processed:
-        average_salary = sum(salarys) // len(salarys)
+        average_salary = sum(salaries) // len(salaries)
     else:
         average_salary = 0
     return {
@@ -97,7 +97,7 @@ def predict_rub_salary(salary_from, salary_to, salary_currency):
         return salary_to*0.8
 
 
-def make_content(languages_params, title):
+def make_table(languages_params, title):
     table_content = [
         ['Язык программирования', 'Вакансий найдено', 'Вакансий обработано', 'Средняя зарплата'],
     ]
@@ -119,7 +119,7 @@ if __name__ == '__main__':
     languages_params_sj = {}
 
     for language in languages:
-        languages_params_sj[language] = get_vacancies_sj(sj_secret_key, language)
-        languages_params_hh[language] = get_vacancies_hh(language)
-    print(make_content(languages_params_sj, title="SuperJob Moscow"))
-    print(make_content(languages_params_hh, title="HeadHunter Moscow"))
+        languages_params_sj[language] = get_sj_vacancies(sj_secret_key, language)
+        languages_params_hh[language] = get_hh_vacancies(language)
+    print(make_table(languages_params_sj, title="SuperJob Moscow"))
+    print(make_table(languages_params_hh, title="HeadHunter Moscow"))
